@@ -1,64 +1,20 @@
-#include "pitches.h"
-#include <Servo.h>
-#include <LiquidCrystal.h> // LCD screen driver 
-
-LiquidCrystal lcd(2, 3, 4, 5, 6, 7); // Parameters: (rs, enable, d4, d5, d6, d7) 
-Servo servo;
-
-int SERVO_PIN = 9;
-int TRIGGER_PIN = 10;
-int SET_PIN = 8;
-int WIFI_RX = 11;
-int WIFI_TX= 12;
-int BUZZER_PIN = 13;
-
-int CLOSED_ANGLE = 0;
-int OPEN_ANGLE = 180;
-int CYCLES_PER_FEED = 3;
-int BUZZ_DURATION = 700;
-long FEED_INTERVAL = 600000;
+#include "constants.h"
+#include "hardware.h"
+#include "buzzer.h"
+#include "wifi.h"
+#include "lcd_messages.h"
 
 boolean auto_enabled = true;
 unsigned long last_feed = 0;
 unsigned long last_status_print = 0;
 int num_feeds = 0;
 
-String version_number = "0.2.1";
+String version_number = "0.3.1";
 
-int sound1[3] = {
-  NOTE_C4, NOTE_C4, NOTE_C4
-};
+char ssid[] = WIFI_SSID; // your network SSID (name)
+char pass[] = WIFI_PASS; // your network password
+int status = WL_IDLE_STATUS; // the Wifi radio's status
 
-int sound2[8] = {
-  NOTE_C4, NOTE_G3, NOTE_G3, NOTE_A3, NOTE_G3, 0, NOTE_B3, NOTE_C4
-};
-
-// note durations: 4 = quarter note, 8 = eighth note, etc.:
-int noteDurations[] = {
-  8, 8, 8, 4, 4, 4, 4, 4
-};
-
-byte heart[8]= {
-  B01010,
-  B11111,
-  B11111,
-  B01110,
-  B00100,
-  B00000,
-  B00000,
-  B00000,
-};
-
-byte fish[8]= {
-  B00000,
-  B10100,
-  B11110,
-  B11111,
-  B11110,
-  B10100,
-  B00000,
-  B00000,
-};
 
 void setup() {
   servo.attach(SERVO_PIN);
@@ -66,72 +22,40 @@ void setup() {
   pinMode(SET_PIN, INPUT);
 
   lcd.begin(16,2); // Initializes the interface to the LCD screen, and specifies the dimensions (width and height) of the display } 
-  lcd.createChar(7, heart);
-  lcd.createChar(6, fish);
+  lcd.createChar(LCD_CHAR_HEART, heart);
+  lcd.createChar(LCD_CHAR_FISH, fish);
 
   print_boot();
   init_servo();
 
+  // initialize serial for debugging
+  Serial.begin(9600);
+  // initialize serial for ESP module
+  Serial1.begin(9600);
+  // initialize ESP module
+  WiFi.init(&Serial1);
+
+  // check for the presence of the shield
+  if (WiFi.status() == WL_NO_SHIELD) {
+    Serial.println("WiFi shield not present");
+  }
+
+  // attempt to connect to WiFi network
+  while (status != WL_CONNECTED) {
+    Serial.print("Attempting to connect to WPA SSID: ");
+    Serial.println(ssid);
+    // Connect to WPA/WPA2 network
+    status = WiFi.begin(ssid, pass);
+  }
+
+  // you're connected now, so print out the data
+  Serial.println("You're connected to the network");
+
+  //connect to MQTT server
+  // client.setServer(MQTT_IP, MQTT_PORT);
+  // client.setCallback(callback);
+
   delay(1000);
-}
-
-void play_melody(int melody[], int length) {
-    // iterate over the notes of the melody:
-  for (int thisNote = 0; thisNote < length; thisNote++) {
-
-    // to calculate the note duration, take one second divided by the note type.
-    //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
-    int noteDuration = 1000 / noteDurations[thisNote];
-    tone(13, melody[thisNote], noteDuration);
-
-    // to distinguish the notes, set a minimum time between them.
-    // the note's duration + 30% seems to work well:
-    int pauseBetweenNotes = noteDuration * 1.30;
-    delay(pauseBetweenNotes);
-    // stop the tone playing:
-    noTone(13);
-  }
-}
-
-void buzz(int freq) {
-  tone(BUZZER_PIN, freq);
-  delay(BUZZ_DURATION);
-  noTone(BUZZER_PIN);
-}
-
-void print_boot() {
-  lcd.setCursor(1,0);
-  lcd.write(7);
-  lcd.print("Fish  Feeder");
-  lcd.write(7);
-  lcd.setCursor(8,1);
-  lcd.print("v. "+version_number); 
-}
-
-void print_status() {
-  if(last_status_print + 1000 > millis()) {
-    return;
-  }
-  int uptime_hours = millis() / 1000 / 60 / 60;
-  String line_1 = "Auto:";
-  if(auto_enabled) {
-    line_1.concat("ON  Up:");
-  } else {
-    line_1.concat("OFF  Up:");
-  }
-  line_1.concat(uptime_hours);
-  line_1.concat("h");
-  String line_2 = "Feeds: ";
-  line_2.concat(num_feeds);
-
-  lcd.clear();
-  lcd.setCursor(0,0);
-  lcd.print(line_1);
-  lcd.setCursor(0,1);
-  lcd.print(line_2); 
-  lcd.write(6);
-
-  last_status_print = millis();
 }
 
 void init_servo() {
@@ -191,6 +115,11 @@ void loop() {
   if(last_feed + FEED_INTERVAL <= millis()) {
     feed_fish();
   }
+
+  // if (!client.connected()) {
+  //   reconnect();
+  // }
+  // client.loop();
 
   print_status();
 }
