@@ -1,0 +1,7 @@
+{
+    "programmer": "AVRISP mkII",
+    "board": "arduino:avr:nano",
+    "sketch": "fish_feeder.ino",
+    "port": "/dev/ttyUSB0",
+    "configuration": "cpu=atmega328"
+}
