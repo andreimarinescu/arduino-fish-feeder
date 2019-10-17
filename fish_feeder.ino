@@ -1,8 +1,12 @@
+#include <Servo.h>
+#include <LiquidCrystal.h> // LCD screen driver 
+#include <WiFiEsp.h>
+#include <WiFiEspClient.h>
+#include <WiFiEspUdp.h>
+#include "SoftwareSerial.h"
+#include <PubSubClient.h>
+
 #include "constants.h"
-#include "hardware.h"
-#include "buzzer.h"
-#include "wifi.h"
-#include "lcd_messages.h"
 
 boolean auto_enabled = true;
 unsigned long last_feed = 0;
@@ -15,6 +19,13 @@ char ssid[] = WIFI_SSID; // your network SSID (name)
 char pass[] = WIFI_PASS; // your network password
 int status = WL_IDLE_STATUS; // the Wifi radio's status
 
+// Initialize the Ethernet client object
+WiFiEspClient espClient;
+// PubSubClient client(espClient);
+SoftwareSerial Serial1(WIFI_RX, WIFI_TX);
+
+LiquidCrystal lcd(2, 3, 4, 5, 6, 7); // Parameters: (rs, enable, d4, d5, d6, d7) 
+Servo servo;
 
 void setup() {
   servo.attach(SERVO_PIN);
@@ -27,70 +38,9 @@ void setup() {
 
   print_boot();
   init_servo();
-
-  // initialize serial for debugging
-  Serial.begin(9600);
-  // initialize serial for ESP module
-  Serial1.begin(9600);
-  // initialize ESP module
-  WiFi.init(&Serial1);
-
-  // check for the presence of the shield
-  if (WiFi.status() == WL_NO_SHIELD) {
-    Serial.println("WiFi shield not present");
-  }
-
-  // attempt to connect to WiFi network
-  while (status != WL_CONNECTED) {
-    Serial.print("Attempting to connect to WPA SSID: ");
-    Serial.println(ssid);
-    // Connect to WPA/WPA2 network
-    status = WiFi.begin(ssid, pass);
-  }
-
-  // you're connected now, so print out the data
-  Serial.println("You're connected to the network");
-
-  //connect to MQTT server
-  // client.setServer(MQTT_IP, MQTT_PORT);
-  // client.setCallback(callback);
+  setup_wifi();
 
   delay(1000);
-}
-
-void init_servo() {
-  servo.write(CLOSED_ANGLE);
-}
-
-void feed_fish() {
-  play_melody(sound1, 3);
-
-  for(int c = 1; c<= CYCLES_PER_FEED; c++) {
-
-    for(int i = CLOSED_ANGLE; i <= OPEN_ANGLE; i++) {
-      servo.write(i);
-      delay(3);
-    }
-  
-    for(int i = OPEN_ANGLE; i >= CLOSED_ANGLE; i--) {
-      servo.write(i);
-      delay(3);
-    }
-
-  }
-
-  last_feed = millis();
-  inc_num_feeds();
-
-  play_melody(sound2, 8);
-}
-
-void set_num_feeds(int feeds) {
-  num_feeds = feeds;
-}
-
-void inc_num_feeds() {
-  set_num_feeds(num_feeds+1);
 }
 
 void loop() { 
