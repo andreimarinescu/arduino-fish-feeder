@@ -1,4 +1,5 @@
 void play_melody(int melody[], int length) {
+  if(!audio_enabled) return;
     // iterate over the notes of the melody:
   for (int thisNote = 0; thisNote < length; thisNote++) {
 
@@ -17,6 +18,7 @@ void play_melody(int melody[], int length) {
 }
 
 void buzz(int freq) {
+  if(!audio_enabled) return;
   tone(BUZZER_PIN, freq);
   delay(BUZZ_DURATION);
   noTone(BUZZER_PIN);

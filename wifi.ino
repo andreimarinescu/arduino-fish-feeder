@@ -23,8 +23,8 @@ void setup_wifi() {
   Serial.println("You're connected to the network");
 
   //connect to MQTT server
-  // client.setServer(MQTT_IP, MQTT_PORT);
-  // client.setCallback(callback);
+  client.setServer(MQTT_IP, MQTT_PORT);
+  client.setCallback(callback);
 }
 
 //print any message received for subscribed topic
@@ -33,36 +33,46 @@ void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print(topic);
 
   Serial.print("] ");
-  for (int i = 0; i < length; i++) {
-    char receivedChar = (char)payload[i];
-    Serial.print(receivedChar);
-    if (receivedChar == '0')
-      Serial.println("Off");
-    if (receivedChar == '1')
-      Serial.println("On");
 
+  char commandArray[10];
+
+  for (int i = 0; i < length; i++) {
+    commandArray[i] = (char)payload[i];
   }
-  Serial.println();
+  commandArray[length] = '\0';
+
+  String command = String(commandArray);
+  Serial.print("Command: ");
+  Serial.println(command);
+  
+  if(command.startsWith("start_feed")) {
+    Serial.println("Feeding fish");
+    feed_fish();
+  } else if(command.startsWith("toggle_audio")) {
+    Serial.println("Toggling audio");
+    audio_enabled = !audio_enabled;
+    print_status();
+  }
 }
 
-// void reconnect() {
-//   // Loop until we're reconnected
-//   while (!client.connected()) {
-//     Serial.print("Attempting MQTT connection...");
-//     // Attempt to connect, just a name to identify the client
-//     if (client.connect("NANO", "bpie", "bpass")) {
-//       Serial.println("connected");
-//       // Once connected, publish an announcement...
-//       client.publish("arduino_test","Hello World");
-//       // ... and resubscribe
-//       client.subscribe("arduino_rcv", 0);
+void reconnect() {
+  // Loop until we're reconnected
+  while (!client.connected()) {
+    Serial.print("Attempting MQTT connection...");
+    // Attempt to connect, just a name to identify the client
+    if (client.connect("NANO", "bpie", "bpass")) {
+      Serial.println("connected");
+      // Once connected, publish an announcement...
+      client.publish("arduino_test","Feeder Connected");
+      // ... and resubscribe
+      client.subscribe("arduino_rcv", 0);
 
-//     } else {
-//       Serial.print("failed, rc=");
-//       Serial.print(client.state());
-//       Serial.println(" try again in 5 seconds");
-//       // Wait 5 seconds before retrying
-//       delay(5000);
-//     }
-//   }
-// }
+    } else {
+      Serial.print("failed, rc=");
+      Serial.print(client.state());
+      Serial.println(" try again in 5 seconds");
+      // Wait 5 seconds before retrying
+      delay(5000);
+    }
+  }
+}

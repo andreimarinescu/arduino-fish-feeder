@@ -1,4 +1,5 @@
 void init_servo() {
+  servo.attach(SERVO_PIN);
   servo.write(CLOSED_ANGLE);
 }
 
@@ -31,4 +32,11 @@ void set_num_feeds(int feeds) {
 
 void inc_num_feeds() {
   set_num_feeds(num_feeds+1);
+  if(client.connected()) {
+    String message = "feed_completed @ ";
+    message.concat(millis());
+    char buffer[50];
+    message.toCharArray(buffer, message.length());
+    client.publish("arduino_test", buffer);
+  }
 }
