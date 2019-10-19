@@ -5,27 +5,23 @@
 #include <WiFiEspUdp.h>
 #include "SoftwareSerial.h"
 #include <PubSubClient.h>
-
 #include "constants.h"
 
-boolean auto_enabled = true;
-boolean audio_enabled = false;
-unsigned long last_feed = 0;
-unsigned long last_status_print = 0;
-int num_feeds = 0;
+char ssid[]                       = WIFI_SSID;
+char pass[]                       = WIFI_PASS;
+int status                        = WL_IDLE_STATUS; // the Wifi radio's status
+int num_feeds                     = 0;
+boolean auto_enabled              = true;
+boolean audio_enabled             = false;
+String version_number             = VERSION_NUMBER;
+unsigned long last_feed           = 0;
+unsigned long last_status_print   = 0;
 
-String version_number = VERSION_NUMBER;
-
-char ssid[] = WIFI_SSID;     // your network SSID (name)
-char pass[] = WIFI_PASS;     // your network password
-int status = WL_IDLE_STATUS; // the Wifi radio's status
-
-// Initialize the Ethernet client object
+PWMServo servo;
 WiFiEspClient espClient;
 PubSubClient client(espClient);
 SoftwareSerial Serial1(WIFI_RX, WIFI_TX);
 LiquidCrystal lcd(2, 3, 4, 5, 6, 7); // Parameters: (rs, enable, d4, d5, d6, d7) 
-PWMServo servo;
 
 void setup() {
   pinMode(TRIGGER_PIN, INPUT);
