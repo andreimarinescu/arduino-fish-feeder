@@ -41,8 +41,6 @@ void setup() {
   print_init_wifi();
   setup_wifi();
   print_status();
-
-  delay(1000);
 }
 
 void loop() { 

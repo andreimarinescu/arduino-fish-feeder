@@ -52,6 +52,35 @@ void callback(char* topic, byte* payload, unsigned int length) {
     Serial.println("Toggling audio");
     audio_enabled = !audio_enabled;
     print_status();
+  } else if(command.startsWith("reset_feeds")) {
+    Serial.println("Resetting feeds");
+    set_num_feeds(0);
+  }
+}
+
+void send_status() {
+  char buffer[130];
+  if(client.connected()) {
+    String availability_payload = "online";
+    availability_payload.toCharArray(buffer, availability_payload.length()+1);
+    client.publish("home/feeder_beta/availability", buffer);
+    String attributes_payload = " { \"num_feeds\": ";
+    attributes_payload.concat(num_feeds);
+    attributes_payload.concat(", \"auto_mode\": ");
+    if(auto_enabled) attributes_payload.concat("\"on\"");
+    else attributes_payload.concat("\"off\"");
+    attributes_payload.concat(", \"sound_mode\": ");
+    if(audio_enabled) attributes_payload.concat("\"on\"");
+    else attributes_payload.concat("\"off\"");
+    attributes_payload.concat(", \"last_feed\": ");
+    attributes_payload.concat(last_feed);
+    attributes_payload.concat("}");
+    attributes_payload.toCharArray(buffer, attributes_payload.length()+1);
+    client.publish("home/feeder_beta/attrs", buffer);
+    String state_payload = "";
+    state_payload.concat(num_feeds);
+    state_payload.toCharArray(buffer, state_payload.length()+1);
+    client.publish("home/feeder_beta/state", buffer);
   }
 }
 

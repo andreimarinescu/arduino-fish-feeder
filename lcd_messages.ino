@@ -14,7 +14,7 @@ void print_init_wifi() {
 }
 
 void print_status() {
-  if(last_status_print + 100000 > millis()) {
+  if(last_status_print + 30000 > millis()) {
     return;
   }
   int uptime_hours = millis() / 1000 / 60 / 60;
@@ -40,4 +40,5 @@ void print_status() {
   // lcd.write(6);
 
   last_status_print = millis();
+  send_status();
 }

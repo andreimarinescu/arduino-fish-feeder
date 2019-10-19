@@ -28,10 +28,6 @@ void feed_fish() {
 
 void set_num_feeds(int feeds) {
   num_feeds = feeds;
-}
-
-void inc_num_feeds() {
-  set_num_feeds(num_feeds+1);
   if(client.connected()) {
     String message = "feed_completed @ ";
     message.concat(millis());
@@ -39,4 +35,8 @@ void inc_num_feeds() {
     message.toCharArray(buffer, message.length());
     client.publish("arduino_test", buffer);
   }
+}
+
+void inc_num_feeds() {
+  set_num_feeds(num_feeds+1);
 }
