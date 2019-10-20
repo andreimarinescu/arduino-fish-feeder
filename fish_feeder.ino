@@ -23,9 +23,6 @@ SoftwareSerial Serial1(WIFI_RX, WIFI_TX);
 LiquidCrystal lcd(2, 3, 4, 5, 6, 7); // Parameters: (rs, enable, d4, d5, d6, d7) 
 
 void setup() {
-  pinMode(TRIGGER_PIN, INPUT);
-  pinMode(SET_PIN, INPUT);
-
   lcd.begin(16,2); // Initializes the interface to the LCD screen, and specifies the dimensions (width and height) of the display } 
   
   byte heart[8]= {
@@ -52,27 +49,6 @@ void setup() {
 }
 
 void loop() { 
-  if(digitalRead(TRIGGER_PIN) == HIGH) {
-    feed_fish();
-  }
-  
-  if(digitalRead(SET_PIN) == HIGH) {
-    delay(400);
-    if(digitalRead(SET_PIN) == HIGH) {
-      delay(1600);
-      if(digitalRead(SET_PIN) == HIGH) {
-        set_num_feeds(0);
-        print_status(true);
-        send_status(true);
-        delay(2000);
-      }
-    } else {
-      auto_enabled = !auto_enabled;
-      print_status(true);
-      send_status(true);
-    }
-  }
-
   if(last_feed + FEED_INTERVAL <= millis()) {
     feed_fish();
   }

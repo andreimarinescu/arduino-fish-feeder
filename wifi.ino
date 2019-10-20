@@ -91,11 +91,10 @@ void send_status(boolean override) {
     String last_feed_payload = "";
     last_feed_payload.concat(last_feed/1000);
     last_feed_payload.toCharArray(buffer, last_feed_payload.length()+1);
-    client.publish("home/feeder_beta/last_feed", buffer);
-    last_status_print = millis();    
+    client.publish("home/feeder_beta/last_feed", buffer);  
     String state_payload = "";
     state_payload.concat(num_feeds);
-    state_payload.toCharArray(buffer, state_payload.length()+1);
+    state_payload.toCharArray(buffer, state_payload.length()+1);  
     client.publish("home/feeder_beta/state", buffer);
     last_status_print = millis();
   }
