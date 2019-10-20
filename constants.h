@@ -18,3 +18,16 @@ int CLOSED_ANGLE    = 0;
 int CYCLES_PER_FEED = 3;
 int OPEN_ANGLE      = 180;
 long FEED_INTERVAL  = 3600000;
+
+int sound1[3] = {
+  NOTE_C4, NOTE_C4, NOTE_C4
+};
+
+int sound2[8] = {
+  NOTE_C4, NOTE_G3, NOTE_G3, NOTE_A3, NOTE_G3, 0, NOTE_B3, NOTE_C4
+};
+
+// note durations: 4 = quarter note, 8 = eighth note, etc.:
+int noteDurations[] = {
+  8, 8, 8, 4, 4, 4, 4, 4
+};
