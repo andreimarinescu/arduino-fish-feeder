@@ -4,7 +4,7 @@ void init_servo() {
 }
 
 void feed_fish() {
-  play_melody(sound1, 3);
+  // play_melody(1, 3);
 
   for(int c = 1; c<= CYCLES_PER_FEED; c++) {
 
@@ -23,7 +23,7 @@ void feed_fish() {
   last_feed = millis();
   inc_num_feeds();
 
-  play_melody(sound2, 8);
+  // play_melody(2, 8);
 }
 
 void set_num_feeds(int feeds) {
