@@ -1,14 +1,13 @@
+#include <EEPROM.h>
+#include <LiquidCrystal.h>
+#include <PubSubClient.h>
 #include <PWMServo.h>
-#include <LiquidCrystal.h> // LCD screen driver 
+#include "SoftwareSerial.h"
 #include <WiFiEsp.h>
 #include <WiFiEspClient.h>
 #include <WiFiEspUdp.h>
-#include "SoftwareSerial.h"
-#include <PubSubClient.h>
 #include "constants.h"
 
-char ssid[]                       = WIFI_SSID;
-char pass[]                       = WIFI_PASS;
 int status                        = WL_IDLE_STATUS; // the Wifi radio's status
 int num_feeds                     = 0;
 boolean auto_enabled              = true;
@@ -28,15 +27,28 @@ void setup() {
   pinMode(SET_PIN, INPUT);
 
   lcd.begin(16,2); // Initializes the interface to the LCD screen, and specifies the dimensions (width and height) of the display } 
+  
+  byte heart[8]= {
+    B01010,
+    B11111,
+    B11111,
+    B01110,
+    B00100,
+    B00000,
+    B00000,
+    B00000,
+  };
   lcd.createChar(LCD_CHAR_HEART, heart);
-  lcd.createChar(LCD_CHAR_FISH, fish);
+  // lcd.createChar(LCD_CHAR_FISH, fish);
 
   print_boot();
+  num_feeds = (int) EEPROM.read(0);
   delay(1500);
   init_servo();
   print_init_wifi();
   setup_wifi();
-  print_status();
+  print_status(true);
+  send_status(true);
 }
 
 void loop() { 
@@ -66,6 +78,6 @@ void loop() {
     reconnect();
   }
   client.loop();
-
   print_status();
+  send_status();
 }

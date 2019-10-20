@@ -22,18 +22,23 @@ void feed_fish() {
 
   last_feed = millis();
   inc_num_feeds();
+  delay(100);
+  print_status(true);
+  send_status(true);
 
   // play_melody(2, 8);
 }
 
 void set_num_feeds(int feeds) {
   num_feeds = feeds;
+  EEPROM.update(0, num_feeds);
   if(client.connected()) {
     String message = "feed_completed @ ";
     message.concat(millis());
     char buffer[50];
-    message.toCharArray(buffer, message.length());
-    client.publish("arduino_test", buffer);
+    message.toCharArray(buffer, message.length()+1);
+    client.publish("home/feeder_beta/messages", buffer);
+    client.loop();
   }
 }
 

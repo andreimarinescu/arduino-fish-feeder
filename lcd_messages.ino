@@ -14,7 +14,11 @@ void print_init_wifi() {
 }
 
 void print_status() {
-  if(last_status_print + 30000 > millis()) {
+  print_status(false);
+}
+
+void print_status(boolean override) {
+  if((last_status_print + 60000 > millis()) && !override ) {
     return;
   }
   int uptime_hours = millis() / 1000 / 60 / 60;
@@ -26,7 +30,7 @@ void print_status() {
   }
   line_1.concat(uptime_hours);
   line_1.concat("h");
-  String line_2 = "Feeds: ";
+  String line_2 = "Feeds:";
   line_2.concat(num_feeds);
   line_2.concat(" Snd:");
   if(audio_enabled) line_2.concat("ON");
@@ -38,7 +42,4 @@ void print_status() {
   lcd.setCursor(0,1);
   lcd.print(line_2); 
   // lcd.write(6);
-
-  last_status_print = millis();
-  send_status();
 }
