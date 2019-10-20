@@ -62,11 +62,14 @@ void loop() {
       delay(1600);
       if(digitalRead(SET_PIN) == HIGH) {
         set_num_feeds(0);
-        print_status();
+        print_status(true);
+        send_status(true);
         delay(2000);
       }
     } else {
       auto_enabled = !auto_enabled;
+      print_status(true);
+      send_status(true);
     }
   }
 
