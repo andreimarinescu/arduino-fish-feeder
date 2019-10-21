@@ -1,7 +1,7 @@
 #include "pitches.h"
 #include "secrets.h"
 
-#define     VERSION_NUMBER  "0.4.6"
+#define     VERSION_NUMBER  "0.4.7"
 
 #define     LCD_CHAR_HEART  7
 // #define     LCD_CHAR_FISH   6

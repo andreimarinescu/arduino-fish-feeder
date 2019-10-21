@@ -49,6 +49,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
   if(command.startsWith("start_feed")) {
     Serial.println("Feeding fish");
     feed_fish();
+  } else if(command.startsWith("toggle_auto")) {
+    Serial.println("Toggling auto");
+    auto_enabled = !auto_enabled;
+    print_status(true);
+    send_status(true);
   } else if(command.startsWith("toggle_audio")) {
     Serial.println("Toggling audio");
     audio_enabled = !audio_enabled;
@@ -70,34 +75,57 @@ void send_status(boolean override) {
   if((last_status_print + 60000 > millis()) && !override ) {
     return;
   }
-  char buffer[110];
   if(client.connected()) {
-    String availability_payload = "online";
-    availability_payload.toCharArray(buffer, availability_payload.length()+1);
-    client.publish("home/feeder_beta/availability", buffer);
-    String attributes_payload = " { \"num_feeds\": ";
-    attributes_payload.concat(num_feeds);
-    attributes_payload.concat(", \"auto_mode\": ");
-    if(auto_enabled) attributes_payload.concat("\"on\"");
-    else attributes_payload.concat("\"off\"");
-    attributes_payload.concat(", \"sound_mode\": ");
-    if(audio_enabled) attributes_payload.concat("\"on\"");
-    else attributes_payload.concat("\"off\"");
-    attributes_payload.concat(", \"firmware\": \"");
-    attributes_payload.concat(version_number);
-    attributes_payload.concat("\" }");
-    attributes_payload.toCharArray(buffer, attributes_payload.length()+1);
-    client.publish("home/feeder_beta/attrs", buffer);
-    String last_feed_payload = "";
-    last_feed_payload.concat(last_feed/1000);
-    last_feed_payload.toCharArray(buffer, last_feed_payload.length()+1);
-    client.publish("home/feeder_beta/last_feed", buffer);  
-    String state_payload = "";
-    state_payload.concat(num_feeds);
-    state_payload.toCharArray(buffer, state_payload.length()+1);  
-    client.publish("home/feeder_beta/state", buffer);
+    send_availability();
+    delay(100);
+    send_attributes();
+    delay(200);
+    send_state();
+    delay(100);
+    send_last_feed();
     last_status_print = millis();
   }
+}
+
+
+void send_availability() {
+  char buffer[15];
+  String availability_payload = "online";
+  availability_payload.toCharArray(buffer, availability_payload.length()+1);
+  client.publish("home/feeder_beta/availability", buffer);
+}
+
+void send_attributes() {
+  char buffer[110];
+  String attributes_payload = " { \"num_feeds\": ";
+  attributes_payload.concat(num_feeds);
+  attributes_payload.concat(", \"auto_mode\": ");
+  if(auto_enabled) attributes_payload.concat("\"on\"");
+  else attributes_payload.concat("\"off\"");
+  attributes_payload.concat(", \"sound_mode\": ");
+  if(audio_enabled) attributes_payload.concat("\"on\"");
+  else attributes_payload.concat("\"off\"");
+  attributes_payload.concat(", \"firmware\": \"");
+  attributes_payload.concat(version_number);
+  attributes_payload.concat("\" }");
+  attributes_payload.toCharArray(buffer, attributes_payload.length()+1);
+  client.publish("home/feeder_beta/attrs", buffer);
+}
+
+void send_last_feed() {
+  char buffer[30];
+  String last_feed_payload = "";
+  last_feed_payload.concat(last_feed/1000);
+  last_feed_payload.toCharArray(buffer, last_feed_payload.length()+1);
+  client.publish("home/feeder_beta/last_feed", buffer);  
+}
+
+void send_state() {
+  char buffer[10];
+  String state_payload = "";
+  state_payload.concat(num_feeds);
+  state_payload.toCharArray(buffer, state_payload.length()+1);  
+  client.publish("home/feeder_beta/state", buffer);
 }
 
 void reconnect() {
