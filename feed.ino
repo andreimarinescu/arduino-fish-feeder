@@ -4,6 +4,8 @@ void init_servo() {
 }
 
 void feed_fish() {
+  if(!auto_enabled) return;
+
   play_melody(sound1, 3);
 
   for(int c = 1; c<= CYCLES_PER_FEED; c++) {
