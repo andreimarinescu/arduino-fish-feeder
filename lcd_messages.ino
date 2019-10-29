@@ -1,16 +1,19 @@
 void print_boot() {
+  Serial.print(F("Initializing Feeduino v. "));
+  Serial.println(VERSION_NUMBER);
   lcd.setCursor(1,0);
-  lcd.write(7);
-  lcd.print("Fish  Feeder");
-  lcd.write(7);
+  lcd.write(LCD_CHAR_HEART);
+  lcd.print(F("Feeduino  SE"));
+  lcd.write(LCD_CHAR_HEART);
   lcd.setCursor(8,1);
-  lcd.print("v. "+version_number); 
+  lcd.print("v. ");
+  lcd.print(VERSION_NUMBER); 
 }
 
 void print_init_wifi() {
   lcd.clear();
   lcd.setCursor(0,0);
-  lcd.print("Connecting WIFI");
+  lcd.print(F("Connecting WIFI"));
 }
 
 void print_status() {
@@ -22,15 +25,15 @@ void print_status(boolean override) {
     return;
   }
   int uptime_hours = millis() / 1000 / 60 / 60;
-  String line_1 = "Auto:";
+  String line_1 = F("Auto:");
   if(auto_enabled) {
-    line_1.concat("ON  Up:");
+    line_1.concat(F("ON  Up:"));
   } else {
-    line_1.concat("OFF  Up:");
+    line_1.concat(F("OFF  Up:"));
   }
   line_1.concat(uptime_hours);
   line_1.concat("h");
-  String line_2 = "Feeds:";
+  String line_2 = F("Feed:");
   line_2.concat(num_feeds);
   line_2.concat(" Snd:");
   if(audio_enabled) line_2.concat("ON");
@@ -41,5 +44,5 @@ void print_status(boolean override) {
   lcd.print(line_1);
   lcd.setCursor(0,1);
   lcd.print(line_2); 
-  // lcd.write(6);
+  lcd.write(LCD_CHAR_HEART);
 }

@@ -12,9 +12,9 @@ int status                        = WL_IDLE_STATUS; // the Wifi radio's status
 int num_feeds                     = 0;
 boolean auto_enabled              = true;
 boolean audio_enabled             = false;
-String version_number             = VERSION_NUMBER;
 unsigned long last_feed           = 0;
 unsigned long last_status_print   = 0;
+unsigned long last_command_ts     = 0;
 
 PWMServo servo;
 WiFiEspClient espClient;
@@ -24,20 +24,10 @@ LiquidCrystal lcd(2, 3, 4, 5, 6, 7); // Parameters: (rs, enable, d4, d5, d6, d7)
 
 void setup() {
   lcd.begin(16,2); // Initializes the interface to the LCD screen, and specifies the dimensions (width and height) of the display } 
-  
-  byte heart[8]= {
-    B01010,
-    B11111,
-    B11111,
-    B01110,
-    B00100,
-    B00000,
-    B00000,
-    B00000,
-  };
   lcd.createChar(LCD_CHAR_HEART, heart);
-  // lcd.createChar(LCD_CHAR_FISH, fish);
-
+  
+  Serial.begin(9600); // initialize serial for debugging
+  
   print_boot();
   num_feeds = (int) EEPROM.read(0);
   delay(1500);
@@ -49,8 +39,13 @@ void setup() {
 }
 
 void loop() { 
+  client.loop();
   if(last_feed + FEED_INTERVAL <= millis()) {
-    feed_fish();
+    feed_fish_auto();
+  }
+
+  if (status != WL_CONNECTED) {
+    setup_wifi();
   }
 
   if (!client.connected()) {

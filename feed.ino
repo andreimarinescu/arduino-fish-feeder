@@ -3,10 +3,14 @@ void init_servo() {
   servo.write(CLOSED_ANGLE);
 }
 
-void feed_fish() {
+void feed_fish_auto() {
   if(!auto_enabled) return;
+  feed_fish();
+}
 
+void feed_fish() {
   play_melody(sound1, 3);
+  client.loop();
 
   for(int c = 1; c<= CYCLES_PER_FEED; c++) {
 
@@ -22,6 +26,8 @@ void feed_fish() {
 
   }
 
+  client.loop();
+
   last_feed = millis();
   inc_num_feeds();
   delay(100);
@@ -35,7 +41,7 @@ void set_num_feeds(int feeds) {
   num_feeds = feeds;
   EEPROM.update(0, num_feeds);
   if(client.connected()) {
-    String message = "feed_completed @ ";
+    String message = F("feed_completed @ ");
     message.concat(millis());
     char buffer[50];
     message.toCharArray(buffer, message.length()+1);
